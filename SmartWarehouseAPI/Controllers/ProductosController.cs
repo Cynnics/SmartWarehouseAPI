@@ -1,12 +1,14 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using SmartWarehouseAPI.Data;
 using SmartWarehouseAPI.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace SmartWarehouseAPI.Controllers
 {
     [ApiController]
     [Route("api/[controller]")]
+    [Authorize]
     public class ProductosController : ControllerBase
     {
         private readonly AppDbContext _context;
@@ -26,11 +28,14 @@ namespace SmartWarehouseAPI.Controllers
         public async Task<ActionResult<Producto>> GetProducto(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-            if (producto == null) return NotFound();
+            if (producto == null)
+                return NotFound(new { message = "Producto no encontrado" });
+
             return producto;
         }
 
         [HttpPost]
+        [Authorize(Roles = "ADMIN,EMPLEADO")]
         public async Task<ActionResult<Producto>> PostProducto(Producto producto)
         {
             _context.Productos.Add(producto);
@@ -39,9 +44,11 @@ namespace SmartWarehouseAPI.Controllers
         }
 
         [HttpPut("{id}")]
+        [Authorize(Roles = "ADMIN,EMPLEADO")]
         public async Task<IActionResult> PutProducto(int id, Producto producto)
         {
-            if (id != producto.IdProducto) return BadRequest();
+            if (id != producto.IdProducto)
+                return BadRequest(new { message = "El ID no coincide" });
 
             _context.Entry(producto).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -49,10 +56,12 @@ namespace SmartWarehouseAPI.Controllers
         }
 
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteProducto(int id)
         {
             var producto = await _context.Productos.FindAsync(id);
-            if (producto == null) return NotFound();
+            if (producto == null)
+                return NotFound();
 
             _context.Productos.Remove(producto);
             await _context.SaveChangesAsync();

@@ -1,7 +1,12 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using SmartWarehouseAPI.Data;
 using SmartWarehouseAPI.Models;
-using Microsoft.EntityFrameworkCore;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
+using System.Text;
 
 namespace SmartWarehouseAPI.Controllers
 {
@@ -10,31 +15,17 @@ namespace SmartWarehouseAPI.Controllers
     public class UsuariosController : ControllerBase
     {
         private readonly AppDbContext _context;
+        private readonly IConfiguration _config;
 
-        public UsuariosController(AppDbContext context)
+        public UsuariosController(AppDbContext context, IConfiguration config)
         {
             _context = context;
+            _config = config;
         }
 
-        // GET: api/usuarios
-        [HttpGet]
-        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
-        {
-            return await _context.Usuarios.ToListAsync();
-        }
-
-        // GET: api/usuarios/5
-        [HttpGet("{id}")]
-        public async Task<ActionResult<Usuario>> GetUsuario(int id)
-        {
-            var usuario = await _context.Usuarios.FindAsync(id);
-            if (usuario == null) return NotFound();
-            return usuario;
-        }
-
-        // POST: api/usuarios/login
+        // ✅ Login: genera token JWT
         [HttpPost("login")]
-        public async Task<ActionResult<Usuario>> Login([FromBody] LoginRequest request)
+        public async Task<IActionResult> Login([FromBody] LoginRequest request)
         {
             var user = await _context.Usuarios
                 .FirstOrDefaultAsync(u => u.Email == request.Email && u.Password == request.Password);
@@ -42,37 +33,42 @@ namespace SmartWarehouseAPI.Controllers
             if (user == null)
                 return Unauthorized(new { message = "Credenciales incorrectas" });
 
+            var token = GenerarToken(user);
+
             return Ok(new
             {
-                user.IdUsuario,
-                user.Nombre,
-                user.Rol,
-                user.Email
+                token,
+                usuario = new
+                {
+                    user.IdUsuario,
+                    user.Nombre,
+                    user.Email,
+                    user.Rol
+                }
             });
         }
 
-        // POST: api/usuarios
+        // ✅ Obtener todos los usuarios (solo admin)
+        [HttpGet]
+        [Authorize(Roles = "ADMIN")]
+        public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
+        {
+            return await _context.Usuarios.ToListAsync();
+        }
+
+        // ✅ Crear usuario nuevo
         [HttpPost]
+        [Authorize(Roles = "ADMIN")]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetUsuario), new { id = usuario.IdUsuario }, usuario);
+            return CreatedAtAction(nameof(GetUsuarios), new { id = usuario.IdUsuario }, usuario);
         }
 
-        // PUT: api/usuarios/5
-        [HttpPut("{id}")]
-        public async Task<IActionResult> PutUsuario(int id, Usuario usuario)
-        {
-            if (id != usuario.IdUsuario) return BadRequest();
-
-            _context.Entry(usuario).State = EntityState.Modified;
-            await _context.SaveChangesAsync();
-            return NoContent();
-        }
-
-        // DELETE: api/usuarios/5
+        // ✅ Eliminar usuario
         [HttpDelete("{id}")]
+        [Authorize(Roles = "ADMIN")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
@@ -81,6 +77,30 @@ namespace SmartWarehouseAPI.Controllers
             _context.Usuarios.Remove(usuario);
             await _context.SaveChangesAsync();
             return NoContent();
+        }
+
+        // 🔒 Generador del token
+        private string GenerarToken(Usuario user)
+        {
+            var jwtSection = _config.GetSection("Jwt");
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSection["Key"]));
+            var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
+
+            var claims = new[]
+            {
+                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
+                new Claim("rol", user.Rol),
+                new Claim("nombre", user.Nombre)
+            };
+
+            var token = new JwtSecurityToken(
+                issuer: jwtSection["Issuer"],
+                audience: jwtSection["Audience"],
+                claims: claims,
+                expires: DateTime.Now.AddMinutes(double.Parse(jwtSection["ExpireMinutes"] ?? "60")),
+                signingCredentials: creds);
+
+            return new JwtSecurityTokenHandler().WriteToken(token);
         }
     }
 

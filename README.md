@@ -61,5 +61,5 @@ Probar endpoints en http://localhost:5000/swagger.
 
 🧠 Autores
 
-Proyecto desarrollado por [Tu Nombre],
+Proyecto desarrollado por Kevin Guerra,
 para el TFG de Desarrollo de Aplicaciones Multiplataforma (DAM).

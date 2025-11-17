@@ -1,7 +1,10 @@
-﻿namespace SmartWarehouseAPI.Models
+﻿using System.ComponentModel.DataAnnotations;
+
+namespace SmartWarehouseAPI.Models
 {
     public class Factura
     {
+        [Key]
         public int IdFactura { get; set; }
         public int IdPedido { get; set; }
         public DateTime FechaEmision { get; set; }

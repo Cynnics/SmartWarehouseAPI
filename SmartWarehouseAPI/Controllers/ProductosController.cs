@@ -18,54 +18,57 @@ namespace SmartWarehouseAPI.Controllers
             _context = context;
         }
 
+        // GET: api/productos
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Producto>>> GetProductos()
+        public async Task<IActionResult> GetProductos()
         {
-            return await _context.Productos.ToListAsync();
+            return Ok(await _context.Productos.ToListAsync());
         }
 
+        // GET: api/productos/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Producto>> GetProducto(int id)
+        public async Task<IActionResult> GetProducto(int id)
         {
-            var producto = await _context.Productos.FindAsync(id);
-            if (producto == null)
-                return NotFound(new { message = "Producto no encontrado" });
-
-            return producto;
+            var prod = await _context.Productos.FindAsync(id);
+            if (prod == null) return NotFound();
+            return Ok(prod);
         }
 
+        // POST: api/productos
         [HttpPost]
-        [Authorize(Roles = "ADMIN,EMPLEADO")]
-        public async Task<ActionResult<Producto>> PostProducto(Producto producto)
+        public async Task<IActionResult> CrearProducto(Producto producto)
         {
             _context.Productos.Add(producto);
             await _context.SaveChangesAsync();
-            return CreatedAtAction(nameof(GetProducto), new { id = producto.IdProducto }, producto);
+            return Ok(producto);
         }
 
+        // PUT: api/productos/5
         [HttpPut("{id}")]
-        [Authorize(Roles = "ADMIN,EMPLEADO")]
-        public async Task<IActionResult> PutProducto(int id, Producto producto)
+        public async Task<IActionResult> EditarProducto(int id, Producto producto)
         {
-            if (id != producto.IdProducto)
-                return BadRequest(new { message = "El ID no coincide" });
+            var p = await _context.Productos.FindAsync(id);
+            if (p == null) return NotFound();   
 
-            _context.Entry(producto).State = EntityState.Modified;
+            p.Nombre = producto.Nombre;
+            p.Descripcion = producto.Descripcion;
+            p.Precio = producto.Precio;
+            p.Stock = producto.Stock;
+
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok(p);
         }
 
+        // DELETE: api/productos/5
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ADMIN")]
-        public async Task<IActionResult> DeleteProducto(int id)
+        public async Task<IActionResult> EliminarProducto(int id)
         {
-            var producto = await _context.Productos.FindAsync(id);
-            if (producto == null)
-                return NotFound();
+            var prod = await _context.Productos.FindAsync(id);
+            if (prod == null) return NotFound();
 
-            _context.Productos.Remove(producto);
+            _context.Productos.Remove(prod);
             await _context.SaveChangesAsync();
-            return NoContent();
+            return Ok();
         }
     }
 }

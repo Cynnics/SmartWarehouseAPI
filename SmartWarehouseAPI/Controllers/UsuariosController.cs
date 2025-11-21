@@ -50,7 +50,7 @@ namespace SmartWarehouseAPI.Controllers
 
         // ✅ Obtener todos los usuarios (solo admin)
         [HttpGet]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<IEnumerable<Usuario>>> GetUsuarios()
         {
             return await _context.Usuarios.ToListAsync();
@@ -58,7 +58,7 @@ namespace SmartWarehouseAPI.Controllers
 
         // ✅ Crear usuario nuevo
         [HttpPost]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "admin")]
         public async Task<ActionResult<Usuario>> PostUsuario(Usuario usuario)
         {
             _context.Usuarios.Add(usuario);
@@ -68,7 +68,7 @@ namespace SmartWarehouseAPI.Controllers
 
         // ✅ Eliminar usuario
         [HttpDelete("{id}")]
-        [Authorize(Roles = "ADMIN")]
+        [Authorize(Roles = "admin")]
         public async Task<IActionResult> DeleteUsuario(int id)
         {
             var usuario = await _context.Usuarios.FindAsync(id);
@@ -88,10 +88,13 @@ namespace SmartWarehouseAPI.Controllers
 
             var claims = new[]
             {
-                new Claim(JwtRegisteredClaimNames.Sub, user.Email),
-                new Claim("rol", user.Rol),
-                new Claim("nombre", user.Nombre)
+                new Claim(JwtRegisteredClaimNames.Sub, user.IdUsuario.ToString()),
+                new Claim(ClaimTypes.Role, user.Rol),
+                new Claim("nombre", user.Nombre),
+                new Claim("email", user.Email)
+
             };
+
 
             var token = new JwtSecurityToken(
                 issuer: jwtSection["Issuer"],

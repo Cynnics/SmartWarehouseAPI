@@ -11,5 +11,6 @@ namespace SmartWarehouseAPI.Models
         public decimal Subtotal { get; set; }
         public decimal IVA { get; set; }
         public decimal Total { get; set; }
+        public bool Activo { get; set; } = true;
     }
 }

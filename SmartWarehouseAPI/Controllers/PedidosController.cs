@@ -72,6 +72,24 @@ public class PedidosController : ControllerBase
         return CreatedAtAction(nameof(GetPedidos), new { id = pedido.IdPedido }, pedido);
     }
 
+    [HttpPut("{id}")]
+    public async Task<IActionResult> PutPedido(int id, Pedido model)
+    {
+        var pedido = await _context.Pedidos.FindAsync(id);
+        if (pedido == null)
+            return NotFound();
+
+        pedido.Estado = model.Estado;
+        pedido.IdCliente = model.IdCliente;
+        pedido.IdRepartidor = model.IdRepartidor;
+        pedido.FechaPedido = model.FechaPedido;
+        pedido.FechaEntrega = model.FechaEntrega;
+
+        await _context.SaveChangesAsync();
+        return Ok(pedido);
+    }
+
+
     // 🔹 GET: totales de un pedido
     [HttpGet("{id}/totales")]
     [Authorize]
@@ -90,5 +108,22 @@ public class PedidosController : ControllerBase
 
         return Ok(new { subtotal, iva, total });
     }
+
+    // DELETE: Eliminar pedido
+    [HttpDelete("{id}")]    
+    [Authorize(Roles = "admin")]
+    public async Task<IActionResult> DeletePedido(int id)
+    {
+        var pedido = await _context.Pedidos.FindAsync(id);
+
+        if (pedido == null)
+            return NotFound(new { message = "Pedido no encontrado" });
+
+        _context.Pedidos.Remove(pedido);
+        await _context.SaveChangesAsync();
+
+        return NoContent();
+    }
+
 
 }

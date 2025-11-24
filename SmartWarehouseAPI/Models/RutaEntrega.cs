@@ -8,5 +8,5 @@ public class RutaEntrega
     public DateTime FechaRuta { get; set; }
     public decimal? DistanciaEstimadaKm { get; set; }
     public int? DuracionEstimadaMin { get; set; }
-    public string Estado { get; set; }
+    public string? Estado { get; set; }
 }

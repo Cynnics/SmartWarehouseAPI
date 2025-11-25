@@ -140,4 +140,25 @@ public class RutasController : ControllerBase
 
         return Ok(ubicaciones);
     }
+
+    // PATCH: api/Rutas/5
+    [HttpPatch("{id}")]
+    [Authorize(Roles = "admin,empleado")]
+    public async Task<IActionResult> PatchRuta(int id, [FromBody] RutaEntrega dto)
+    {
+        var ruta = await _context.RutasEntrega.FindAsync(id);
+        if (ruta == null)
+            return NotFound();
+
+        ruta.IdRepartidor = dto.IdRepartidor;
+        ruta.FechaRuta = dto.FechaRuta;
+        ruta.DistanciaEstimadaKm = dto.DistanciaEstimadaKm;
+        ruta.DuracionEstimadaMin = dto.DuracionEstimadaMin;
+        ruta.Estado = dto.Estado;
+
+        await _context.SaveChangesAsync();
+
+        return Ok(ruta);
+    }
+
 }

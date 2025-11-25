@@ -18,7 +18,7 @@ namespace SmartWarehouseAPI.Data
         public DbSet<DetallePedido> DetallesPedido { get; set; }
         public DbSet<RutaPedido> RutasPedido { get; set; }
         public DbSet<UbicacionRepartidor> UbicacionesRepartidor { get; set; }
-        public DbSet<Albaran> Albaranes { get; set; }
+        public DbSet<Albaran> Albaranes { get; set; }   
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {

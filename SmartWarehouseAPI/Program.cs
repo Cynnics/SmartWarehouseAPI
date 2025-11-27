@@ -7,6 +7,12 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
+// 🔥 IMPORTANTE: Configurar URLs para aceptar conexiones externas
+builder.WebHost.ConfigureKestrel(options =>
+{
+    options.ListenAnyIP(5294); // Escucha en todas las interfaces de red en el puerto 5294
+});
+
 // 🌐 Habilitar CORS para aplicaciones externas (Android / Escritorio)
 builder.Services.AddCors(options =>
 {

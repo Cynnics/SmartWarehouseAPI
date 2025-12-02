@@ -15,6 +15,18 @@ public class PedidosController : ControllerBase
         _context = context;
     }
 
+    // GET: api/Pedidos/
+    [HttpGet("{id}")]
+    public async Task<ActionResult<Pedido>> GetPedido(int id)
+    {
+        var pedido = await _context.Pedidos.FindAsync(id);
+        if (pedido == null)
+            return NotFound();
+
+        return Ok(pedido);
+    }
+
+
     // 🔹 GET con filtro opcional
     [HttpGet]
     public async Task<ActionResult<IEnumerable<Pedido>>> GetPedidos([FromQuery] string estado = null)
@@ -60,7 +72,7 @@ public class PedidosController : ControllerBase
 
     // 🔹 POST: crear pedido
     [HttpPost]
-    [Authorize(Roles = "admin,empleado")]
+    [Authorize(Roles = "admin,empleado,cliente")]
     public async Task<ActionResult<Pedido>> PostPedido(Pedido pedido)
     {
         pedido.FechaPedido = DateTime.Now;

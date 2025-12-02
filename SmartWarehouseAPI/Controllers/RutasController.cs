@@ -14,7 +14,7 @@ public class RutasController : ControllerBase
 
     // GET: api/Rutas
     [HttpGet]
-    [Authorize(Roles = "admin,empleado")]
+    [Authorize(Roles = "admin,empleado,repartidor")]
     public async Task<IActionResult> GetAll()
     {
         var rutas = await _context.RutasEntrega.ToListAsync();

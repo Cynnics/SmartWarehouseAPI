@@ -13,4 +13,8 @@ public class Pedido
     public DateTime FechaPedido { get; set; }
 
     public DateTime? FechaEntrega { get; set; } // ← NUEVO
+
+    public string? DireccionEntrega { get; set; }  // Nueva propiedad
+    public string? Notas { get; set; }             // Opcional
+
 }

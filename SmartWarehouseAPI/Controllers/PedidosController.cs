@@ -2,6 +2,8 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using SmartWarehouseAPI.Data;
+using SmartWarehouseAPI.Models;
+using SmartWarehouseAPI.Models.Request;
 
 [ApiController]
 [Route("api/[controller]")]

@@ -1,4 +1,5 @@
 ﻿using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 public class Pedido
 {
@@ -12,9 +13,20 @@ public class Pedido
 
     public DateTime FechaPedido { get; set; }
 
-    public DateTime? FechaEntrega { get; set; } // ← NUEVO
+    public DateTime? FechaEntrega { get; set; }
 
-    public string? DireccionEntrega { get; set; }  // Nueva propiedad
-    public string? Notas { get; set; }             // Opcional
+    public string? DireccionEntrega { get; set; }
 
+    // 🔥 NUEVOS CAMPOS AÑADIDOS
+    public string? Ciudad { get; set; }
+
+    public string? CodigoPostal { get; set; }
+
+    [Column(TypeName = "decimal(10, 6)")]
+    public decimal? Latitud { get; set; }
+
+    [Column(TypeName = "decimal(10, 6)")]
+    public decimal? Longitud { get; set; }
+
+    public string? Notas { get; set; }
 }

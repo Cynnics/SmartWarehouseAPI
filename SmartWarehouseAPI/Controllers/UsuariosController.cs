@@ -43,7 +43,8 @@ namespace SmartWarehouseAPI.Controllers
                     user.IdUsuario,
                     user.Nombre,
                     user.Email,
-                    user.Rol
+                    user.Rol,
+                    user.Telefono
                 }
             });
         }
@@ -91,7 +92,8 @@ namespace SmartWarehouseAPI.Controllers
                 new Claim(JwtRegisteredClaimNames.Sub, user.IdUsuario.ToString()),
                 new Claim(ClaimTypes.Role, user.Rol),
                 new Claim("nombre", user.Nombre),
-                new Claim("email", user.Email)
+                new Claim("email", user.Email),
+                new Claim("telefono", user.Telefono)
 
             };
 
